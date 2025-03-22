@@ -35,9 +35,8 @@ const searchGithubUser = async (username: string) => {
     if (!response.ok) {
       throw new Error('invalid API response, check the network tab');
     }
-    return data;
+    return data; // The response includes the bio field
   } catch (err) {
-    // console.log('an error occurred', err);
     return {};
   }
 };

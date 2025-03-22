@@ -1,51 +1,50 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Candidate } from '../interfaces/Candidate.interface';
 
 const SavedCandidates = () => {
-  const [savedCandidates, setSavedCandidates] = useState<Candidate[]>([]);
+  const [savedCandidates, setSavedCandidates] = useState<Candidate[]>(() => {
+    // Load saved candidates from localStorage
+    const saved = localStorage.getItem('savedCandidates');
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('savedCandidates') || '[]');
-    setSavedCandidates(saved);
-  }, []);
+  const removeCandidate = (id: number) => {
+    // Filter out the candidate to be removed
+    const updatedCandidates = savedCandidates.filter((candidate) => candidate.id !== id);
+    setSavedCandidates(updatedCandidates);
+
+    // Update localStorage
+    localStorage.setItem('savedCandidates', JSON.stringify(updatedCandidates));
+  };
 
   if (savedCandidates.length === 0) {
-    return <h1>No saved candidates</h1>;
+    return <h1>No saved candidates.</h1>;
   }
 
   return (
     <div>
       <h1>Potential Candidates</h1>
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Avatar</th>
-            <th>Name</th>
-            <th>Username</th>
-            <th>Location</th>
-            <th>Email</th>
-            <th>Company</th>
-            <th>Profile</th>
-          </tr>
-        </thead>
-        <tbody>
-          {savedCandidates.map((candidate) => (
-            <tr key={candidate.id}>
-              <td>
-                <img src={candidate.avatar_url} alt={candidate.login} width="50" />
-              </td>
-              <td>{candidate.name || 'N/A'}</td>
-              <td>{candidate.login}</td>
-              <td>{candidate.location || 'N/A'}</td>
-              <td>{candidate.email || 'N/A'}</td>
-              <td>{candidate.company || 'N/A'}</td>
-              <td>
-                <a href={candidate.html_url}>{candidate.html_url}</a>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="saved-candidates-container">
+        {savedCandidates.map((candidate) => (
+          <div key={candidate.id} className="saved-candidate-box">
+            <img src={candidate.avatar_url} alt={candidate.login} />
+            <div className="saved-candidate-details">
+              <p>Name: {candidate.name || 'N/A'}</p>
+              <p>Username: {candidate.login}</p>
+              <p>Location: {candidate.location || 'N/A'}</p>
+              <p>Email: {candidate.email || 'N/A'}</p>
+              <p>Company: {candidate.company || 'N/A'}</p>
+              <p>Bio: {candidate.bio || 'N/A'}</p>
+              <p>
+                Profile: <a href={candidate.html_url}>{candidate.html_url}</a>
+              </p>
+            </div>
+            <button onClick={() => removeCandidate(candidate.id)} className="remove-button">
+              Remove
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
